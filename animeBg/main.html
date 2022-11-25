@@ -2,51 +2,50 @@
 <html>
     <head>
         <title> main </title>
-        <script src="anime.min.js"></script>
-
+        <!-- <link rel="stylesheet" href="style.css"> -->
+        <!-- <script src="anime.min.js"></script> -->
+        <!-- <script defer src="script.js"></script> -->
         <style>
-            body {
-                background-color: rgb(20,20,20);
-                height: 100vh;
-                overflow: hidden;
-                margin: 0px;
-            }
-
-            #tiles {
-                height: 100vh;
-                width: 100vw;
-
-                display: grid;
-                grid-template-columns: repeat(var(--columns), 1fr);
-                grid-template-rows: repeat(var(--rows), 1fr);
-            }
-            .tile {
-                outline: 1px solid white;
-            }
-        </style>
+        body {
+            background-color: rgb(20,20,20);
+            height: 100vh;
+            overflow: hidden;
+            margin: 0px;
+        }
         
+        #tiles {
+            height: 100vh;
+            width: 100vw;
+        
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+            grid-template-rows: repeat(auto-fit, minmax(50px, 1fr));
+        }
+        .tile {
+            outline: 1px solid white;
+        }</style>
     </head>
     <body>
         <div id="tiles"> </div>
-
-        
+        <script type="text/javascript" src="lib/anime.min.js"></script>
         <script>
             const wrapper = document.getElementById("tiles");
-
+            
             const colors = [
-                "rgb(255,0,0)",
-                "rgb(255,0,0)",
-                "rgb(255,0,0)",
-                "rgb(255,0,0)",
-                "rgb(255,0,0)",
-            ];
-
+                            "rgb(255,0,0)",
+                            "rgb(255,0,0)",
+                            "rgb(255,0,0)",
+                            "rgb(255,0,0)",
+                            "rgb(255,0,0)",
+                        ];
+            
             let count = -1;
-
-            let columns = Math.floor(document.body.clientWidth / 50),
-                rows = Math.floor(document.body.clientHeight / 50);
-
+            
+            let columns = Math.floor(document.body.clientWidth / 50);
+            let rows = Math.floor(document.body.clientHeight / 50);
+            
             const handdleOnClick = index => {
+                console.log(index)
                 anime({
                     target: ".tile", 
                     backgroundColor: colors[count % (colors.length -1)],
@@ -56,39 +55,39 @@
                     })
                 })
             }
-
-
+            
+            
             const createTile = index => {
                 const tile = document.createElement("div");
-
+            
                 tile.classList.add("tile");
                 
                 tile.onclick = e => handdleOnClick(index)
-
+            
                 return tile
             }
-
+            
             const createTiles = quantity => {
                 Array.from(Array(quantity)).map((tile,index) => {
                     wrapper.appendChild(createTile(index));
                 })
             }
-
+            
             const createGrid = () => {
                 wrapper.innerHTML = "";
-
+            
                 columns = Math.floor(document.body.clientWidth / 50);
                 rows = Math.floor(document.body.clientHeight / 50);
                 
                 wrapper.style.setProperty("--columns", columns);
                 wrapper.style.setProperty("--rows", rows);
-
+            
                 createTiles(columns * rows);
             }
-
+            
             window.onresize = () => createGrid();
-
-            createTiles(columns * rows)
+            
+            createGrid(columns * rows)
         </script>
     </body>
 </html>
