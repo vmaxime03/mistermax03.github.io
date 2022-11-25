@@ -3,9 +3,6 @@
     <head>
         <title> main </title>
         <script src="anime.min.js"></script>
-    </head>
-    <body>
-        <div id="tiles"> </div>
 
         <style>
             body {
@@ -27,6 +24,12 @@
                 outline: 1px solid white;
             }
         </style>
+        
+    </head>
+    <body>
+        <div id="tiles"> </div>
+
+        
         <script>
             const wrapper = document.getElementById("tiles");
 
@@ -44,7 +47,6 @@
                 rows = Math.floor(document.body.clientHeight / 50);
 
             const handdleOnClick = index => {
-                
                 anime({
                     target: ".tile", 
                     backgroundColor: colors[count % (colors.length -1)],
