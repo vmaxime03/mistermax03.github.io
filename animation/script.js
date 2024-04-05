@@ -1,9 +1,10 @@
 const colors = [
-                "rgb(255,0,0)",
-                "rgb(255,255,0)",
-                "rgb(255,0,255)",
-                "rgb(255,255,255)",
-                "rgb(0,0,0)",
+                "rgb(250,250,250)",
+                "rgb(200,200,200)",
+                "rgb(150150,150)",
+                "rgb(100,100,100)",
+                "rgb(50 ,50 ,50 )",
+                "rgb(0,  0,  0, )"
             ];
 
 
@@ -17,7 +18,7 @@ let columns = Math.floor(document.body.clientWidth / 50);
 let rows = Math.floor(document.body.clientHeight / 50);
 
 let gridArray;
-const delay = 500;
+const delay = 50;
 
 const Corners = {
     TOPRIGHT: 12,
@@ -25,6 +26,7 @@ const Corners = {
     BOTTOMRIGHT : 19,
     BOTTOMLEFT  : 20,
 };
+
 class Tile {
     constructor(tile, timeoutID, state) {
         this.tile = tile;
@@ -43,7 +45,7 @@ const tileHandler = (x, y) => {
 
 const changeColor = (x, y) => {
     let t = gridArray[y][x];
-    if (t.state < 5) {
+    if (t.state < colors.length) {
         console.log("colorchange")
         t.tile.style.backgroundColor = colors[t.state++];
         setTimeout(changeColor, delay, x, y);
@@ -68,6 +70,7 @@ const propager = (x,y) => {
 }
 
 const propagerCorner =  (x, y, corner) => {
+    changeColor(x, y)
     switch (corner) {
         case Corners.TOPLEFT :
             if (inbounds(x-1, y+1)) propagerCorner(x-1, y+1, Corners.TOPLEFT);
@@ -119,6 +122,8 @@ const createGrid = () => {
             tile.dataset.y = y;
             gridArray[y][x] = new Tile(tile, 0, 0);
             tile.addEventListener("click", tileHandler(x,y));
+
+            tile.innerText = `${x}-${y}`
         }
     }
 
