@@ -1,22 +1,22 @@
-// const colors = ["rgb(0,0,0)",
-//                 "rgb(50,50,50)", 
-//                 "rgb(100,100,100)",
-//                 "rgb(150,150,150)",
-//                 "rgb(200,200,200)",
-//                 "rgb(250,250,250)"  
-//             ];
-
 class Color {
     constructor (r, g, b) {
         this.red = r;
         this.green = g;
         this.blue = b;
     }
+    getCssRGB () {
+        return `rgb(${this.red},${this.green},${this.blue})`
+    }
+}
+const getRandomColor= () => {
+    return new Color(Math.floor(Math.random()*256),Math.floor(Math.random()*256),Math.floor(Math.random()*256));
 }
 const fade = (from, target, nbcolors) => {
     let r = new Array(nbcolors);
     for (let i = 1; i <= nbcolors; i++) {
-        r[i-1] = `rgb(${Math.floor(from.red+((target.red-from.red)/nbcolors*i))},${Math.floor(from.green+((target.green-from.green)/nbcolors*i))},${Math.floor(from.blue+((target.blue-from.blue)/nbcolors*i))})`;
+        r[i-1] = new Color(Math.floor(from.red+((target.red-from.red)/nbcolors*i)),
+                            Math.floor(from.green+((target.green-from.green)/nbcolors*i)),
+                            Math.floor(from.blue+((target.blue-from.blue)/nbcolors*i)));
     }
     return r;
 }
@@ -40,13 +40,6 @@ window.addEventListener("load", () => {
 });
 
 
-const Corners = {
-    TOPRIGHT: "tr",
-    TOPLEFT : "tl",
-    BOTTOMRIGHT : "br",
-    BOTTOMLEFT  : "bl",
-};
-
 class Tile {
     constructor(tile) {
         this.tile = tile;
@@ -59,18 +52,19 @@ const tileHandler = (x, y) => {
     return (event) => {
         let colors = fade(from, target, 6);
         from = target;
-        target = new Color(Math.floor(Math.random()*256),Math.floor(Math.random()*256),Math.floor(Math.random()*256));
-
+        target = getRandomColor();
         changeColor(x, y, colors);
-        setTimeout(propager, delay, x, y, colors);
+        setTimeout(propagatev2, delay, x, y, colors);
     }
 }
 
 const changeColor = (x, y, colors, first=true) => {
     let t = gridArray[y][x];
-    if (first) t.colors = colors;
+    if (first) {
+        t.colors = colors;
+    }
     if (t.state < t.colors.length) {
-        t.tile.style.backgroundColor = t.colors[t.state++];
+        t.tile.style.backgroundColor = t.colors[t.state++].getCssRGB();
         setTimeout(changeColor, colorChangeDelay, x, y, colors, false);
     } else {
         t.state = 0;
@@ -82,45 +76,44 @@ const inbounds = (x,y)  => {
     return ((x >= 0 && x < columns) && (y >= 0 && y< rows))
 }
 
-const propager = (x,y, colors) => {
-    lineColorChange(x,y, 1, 0, colors);  
-    lineColorChange(x,y, -1, 0, colors);  
-    lineColorChange(x,y, 0, 1, colors);   
-    lineColorChange(x,y, 0, -1, colors);  
+const propagatev2 = (x, y, colors, r=1) => {
+    let pdx = 1;
+    let pdy = r;
+    let ndx = -1;
+    let ndy = -r;
+    while (dx < dy) {
+        if (inbounds(x+dx, y+dy)) changeColor(x+dx, y+dy, colors);
+        if (inbounds(x+dx, y-dy)) changeColor(x+dx, y-dy, colors);
+        if (inbounds(x-dx, y+dy)) changeColor(x-dx, y+dy, colors);
+        if (inbounds(x-dx, y-dy)) changeColor(x-dx, y-dy, colors);
 
-    if (inbounds(x+1, y+1)) setTimeout(propagerCorner, delay, x+1, y+1, Corners.BOTTOMRIGHT, colors);
-    if (inbounds(x-1, y-1)) setTimeout(propagerCorner, delay, x-1, y-1, Corners.TOPLEFT, colors);
-
-    if (inbounds(x+1, y-1)) setTimeout(propagerCorner, delay, x+1, y-1, Corners.TOPRIGHT, colors);
-    if (inbounds(x-1, y+1)) setTimeout(propagerCorner, delay, x-1, y+1, Corners.BOTTOMLEFT, colors);
-    
+        //if (inbounds(x+dy, y+dx)) changeColor(x+dy, y+dx, colors);
+        //if (inbounds(x+dy, y-dx)) changeColor(x+dy, y-dx, colors);
+        //if (inbounds(x-dy, y+dx)) changeColor(x-dy, y+dx, colors);
+        //if (inbounds(x-dy, y-dx)) changeColor(x-dy, y-dx, colors);
+        dx++;
+        dy--;
+    }
+    if (inbounds(x+dx, y+dy)) setTimeout(propagatev2, delay, x, y, colors, ++r);
+    console.log("rec");
 }
 
-const propagerCorner =  (x, y, corner, colors) => {
-    changeColor(x, y, colors);
-    switch (corner) {
-        case Corners.TOPLEFT :
-            setTimeout(lineColorChange, delay, x, y, -1, 0, colors);
-            setTimeout(lineColorChange, delay, x, y, 0, -1, colors);
-            if (inbounds(x-1, y-1)) setTimeout(propagerCorner, delay*2, x-1, y-1, Corners.TOPLEFT, colors);
-            break;
-        case Corners.TOPRIGHT : 
-            setTimeout(lineColorChange, delay, x, y, 1, 0, colors);
-            setTimeout(lineColorChange, delay, x, y, 0, -1, colors);
-            if (inbounds(x+1, y-1)) setTimeout(propagerCorner, delay*2, x+1, y-1, Corners.TOPRIGHT, colors);
-            break;
-        case Corners.BOTTOMLEFT :
-            setTimeout(lineColorChange, delay, x, y, -1, 0, colors);
-            setTimeout(lineColorChange, delay, x, y, 0, 1, colors);
-            if (inbounds(x-1, y+1)) setTimeout(propagerCorner, delay*2, x-1, y+1, Corners.BOTTOMLEFT, colors);
-            break;
-        case Corners.BOTTOMRIGHT :
-            setTimeout(lineColorChange, delay, x, y, 1, 0, colors);
-            setTimeout(lineColorChange, delay, x, y, 0, 1, colors);
-            if (inbounds(x+1, y+1)) setTimeout(propagerCorner, delay*2, x+1, y+1, Corners.BOTTOMRIGHT, colors);
-            break;
+const propagatev3 = (x, y, colors) => {
+    let r = 0;
+    lineColorChange(x, y, 1, 0, colors);
+    lineColorChange(x, y, -1, 0, colors);
+    lineColorChange(x, y, 0, 1, colors);
+    lineColorChange(x, y, 0, -1, colors);
+
+
+    while (x+r < rows || x-r < columns) {
+        if (inbounds(x+r, y)) lineColorChange(x+r, y, 0, 1, colors);
+        if (inbounds(x+r, y)) lineColorChange(x+r, y, 0, -1, colors);
+        if (inbounds(x-r, y)) lineColorChange(x-r, y, 0, 1, colors);
+        if (inbounds(x-r, y)) lineColorChange(x-r, y, 0, -1, colors);
     }
 }
+
 
 const lineColorChange = (x, y, dirx, diry, colors) => {
     if (inbounds(x+dirx, y+diry)) {
@@ -152,7 +145,7 @@ const createGrid = () => {
             gridArray[y][x] = new Tile(tile);
             tile.addEventListener("click", tileHandler(x,y));
 
-            // tile.innerText = `${x}-${y}`
+            tile.innerText = `${x}-${y}`
         }
     }
 }
